@@ -35,10 +35,6 @@ Open a pull request or issue on [GitHub](https://github.com/varunjoshi0404/EKS-T
 
 ---
 
-Here’s a more complete and professional way to say that:
-
----
-
 ## License
 
 This course material is open-source under the **MIT License**.
