@@ -35,7 +35,17 @@ Open a pull request or issue on [GitHub](https://github.com/varunjoshi0404/EKS-T
 
 ---
 
+Here’s a more complete and professional way to say that:
+
+---
+
 ## License
 
-This course material is open-source under the MIT License.
+This course material is open-source under the **MIT License**.
+
+While the source code and configuration files are freely available for learning and contribution, **unauthorized reproduction or redistribution of this material (in part or full) for commercial purposes, reposting as-is on other platforms, or claiming ownership without prior consent from the author is not permitted**.
+
+If you'd like to use this content in your own training, platform, or curriculum, please reach out for permission or collaboration.
+
+
 
