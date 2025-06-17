@@ -1,0 +1,49 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+.env
+.venv/
+env/
+venv/
+pip-wheel-metadata/
+dist/
+build/
+.eggs/
+.pytest_cache/
+
+# === Docker ===
+*.log
+*.pid
+docker-compose.override.yml
+.dockerignore
+
+# === Kubernetes / YAML ===
+*.bak
+.kube/
+
+# === eksctl and AWS ===
+eksctl-output.json
+.eksctl/
+.aws/
+*.pem
+*.key
+
+# === OS-specific ===
+.DS_Store
+Thumbs.db
+
+# === Editor and IDE files ===
+.vscode/
+.idea/
+*.swp
+*~
+*.sublime-workspace
+*.sublime-project
+
+# === Git ===
+*.orig
+*.rej
