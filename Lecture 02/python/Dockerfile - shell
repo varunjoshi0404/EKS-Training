@@ -1,0 +1,17 @@
+# Use a lightweight Python image as the base
+FROM python:3.9-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the application file from the host to the container
+COPY app.py app.py
+
+# Install Flask library
+RUN pip install flask
+
+# Expose the port where the app will run
+EXPOSE 5000
+
+# Default command to run the application
+CMD python app.py
