@@ -409,6 +409,42 @@ The **Kubelet** on the assigned node monitors the API Server for changes to Pod 
    - The **API Server updates the Pod's status** in etcd to reflect the current state of the containers.  
 ---
 
+
+
+## Essential Kubernetes Add-ons and Their Data Flow
+### **1. Metrics Server**
+
+* **Purpose:**
+  A lightweight aggregator of resource usage data (CPU and memory) across nodes and pods.
+* **Used by:**
+  `kubectl top`, Horizontal Pod Autoscaler (HPA), and other monitoring tools.
+* **Data Source:**
+  Pulls metrics directly from the **Kubelet** running on each node, via the `/stats/summary` endpoint.
+
+---
+
+### **2. CoreDNS**
+
+* **Purpose:**
+  Provides DNS-based service discovery inside the cluster — allows pods and services to resolve each other by name.
+* **Used by:**
+  All in-cluster components that rely on DNS (e.g., `my-service.my-namespace.svc.cluster.local`).
+* **Data Source:**
+  Fetches service and pod DNS records from the **Kubernetes API server** (via the cluster DNS schema).
+
+---
+
+### **3. Kubernetes Dashboard**
+
+* **Purpose:**
+  A web-based UI to manage and monitor Kubernetes cluster resources (deployments, services, pods, etc.).
+* **Used by:**
+  Developers and operators who prefer a visual interface over CLI.
+* **Data Source:**
+  Talks directly to the **Kubernetes API server** using an authenticated service account.
+
+---
+
 ### Additional Resources
 
 Kubernetes Documentation: [[Kubernetes Architecture](https://kubernetes.io/docs/concepts/architecture/)]
