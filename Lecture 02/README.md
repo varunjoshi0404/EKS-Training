@@ -52,7 +52,7 @@ Docker does **not** run natively on macOS or Windows. Instead, **Docker Desktop*
 - Docker Engine relies heavily on Linux features like **cgroups**, **namespaces**, and **UnionFS (e.g., overlay2)** — which are unavailable on macOS and Windows.
      
     - **cgroups** are a Linux kernel feature that limit and isolate the resource usage (CPU, memory, disk I/O, etc.) of a group of processes.
-    - **Namespaces** provide process-level isolation by creating separate views of system resources like PID, network, mount, and filesystem.This allows containers to run as if they are the only process on the system.
+    - **Namespaces** provide process-level isolation by creating separate views of system resources like PID, network, mount, and filesystem. This allows containers to run as if they are the only process on the system.
 
 
 **NOTE**: While you can install **Docker Desktop** on a **Linux system**, it’s generally not recommended because Linux natively supports Docker Engine, which is more lightweight and efficient. When you run Docker Desktop on Linux, it still creates a lightweight virtual machine using the system's virtualization technology, adding an unnecessary layer of overhead compared to using Docker Engine directly on the host.
