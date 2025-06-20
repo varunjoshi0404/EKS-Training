@@ -282,7 +282,9 @@ eksctl create cluster \
   --name eks-cluster-1 \
   --region us-east-1 \
   --zones us-east-1a,us-east-1b \
-  --without-nodegroup
+  --tags "owner=varun-joshi,bu=cis" \
+  --with-oidc \
+  --without-nodegroup \
 ```
 
 By default, if we don’t specify the `--without-nodegroup` flag, eksctl will automatically provision **two m5.large** EC2 instances as part of a managed node group. For this demo, we want to avoid spinning up large instances unnecessarily. Instead, we’ll supply a configuration file to define the cluster setup explicitly — including instance types, desired capacity, and other settings.
