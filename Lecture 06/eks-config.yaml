@@ -1,0 +1,43 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: eks-cluster-1
+  region: us-east-2
+  tags:
+    owner: varun-joshi
+    bu: cis
+    environment: dev
+    project: eks-training
+    cost-center: C1234
+
+availabilityZones:
+  - us-east-2a
+  - us-east-2b
+
+iam:
+  withOIDC: true
+
+managedNodeGroups:
+  - name: ng-public-1
+    instanceType: t3a.medium
+    minSize: 2
+    maxSize: 4
+    privateNetworking: false
+    volumeSize: 20
+    ssh:
+      allow: true
+      publicKeyName: eks-vj-ohio
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        externalDNS: true
+        certManager: false
+        ebs: false
+        fsx: false
+        efs: false
+        albIngress: true
+        xRay: false
+        cloudWatch: false
+    labels:
+      lifecycle: ec2-autoscaler
