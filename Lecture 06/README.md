@@ -327,6 +327,12 @@ managedNodeGroups:
       lifecycle: ec2-autoscaler   # Optional label you can use in node selectors
 ```
 
+You can run the below command to see the add-ons that are added by default:
+
+```bash
+eksctl get addons --cluster <cluster-name>
+```
+
 ---
 
 ### Step 3: Clean Up — Deleting the Cluster
@@ -336,6 +342,110 @@ Once you're done practicing, delete the cluster using the same config file:
 ```bash
 eksctl delete cluster -f eks-cluster-config.yaml
 ```
+
+---
+
+### Understanding eksctl's Behavior: No State Reconciliation
+
+Unlike tools like **Terraform**, `eksctl` does **not support reconciliation**. It doesn’t compare your current infrastructure state with the desired state defined in your config file.
+
+In **Terraform**, when you run `terraform apply`, it first performs a **state comparison**—checking what's already provisioned vs what needs to be changed. But with `eksctl`, no such comparison happens.
+
+#### What this means for you:
+
+If you've already created a cluster using:
+
+```bash
+eksctl create cluster -f eks-cluster-config.yaml
+```
+
+…and you now want to add another node group, **you cannot simply modify the config and re-run the same `create cluster` command**. Doing so will throw an error because the cluster already exists, and `eksctl` doesn’t merge changes.
+
+#### The right way to add a node group:
+
+1. Add the new `managedNodeGroup` section to your existing `eks-cluster-config.yaml`.
+2. Then run:
+
+```bash
+eksctl create nodegroup -f eks-cluster-config.yaml
+```
+
+`eksctl` will:
+
+* Parse the config file
+* Detect the existing cluster
+* Create **only** the new node group
+
+You’ll notice that this new node group is provisioned via a **separate CloudFormation stack**, which is visible in the AWS CloudFormation console.
+
+---
+
+### Why This Matters
+
+Understanding this behavior is crucial:
+
+* `eksctl` is **declarative in syntax**, but **imperative in behavior**
+* It won’t "apply diffs" like Terraform
+* Each `eksctl` command is a **task in isolation** (e.g., create cluster, create nodegroup)
+
+Use the right subcommand (`create cluster`, `create nodegroup`, etc.) for each stage of your workflow.
+
+---
+
+### ❓ If `eksctl` Cannot Reconcile State, Why Use Configuration Files?
+
+Even though `eksctl` doesn’t support state reconciliation like Terraform or CloudFormation, using a **declarative config file** is still widely preferred over imperative flag-based commands.
+
+#### 1. **Auditability & Version Control**
+
+* A YAML config file **documents** every setting used during cluster creation—node group sizes, AZs, SSH access, IAM permissions, tags, and more.
+* You can check this file into **version control** (Git), enabling reproducibility and collaborative editing.
+* Without it, your cluster may be a black box—hard to re-create or debug later.
+
+> ✅ With a config file, you always know *what went in*, even if you can't reapply it to update the cluster directly.
+
+---
+
+#### 2. **Bridge to CloudFormation Customization**
+
+* Behind the scenes, `eksctl` uses **AWS CloudFormation (CFN)** to provision resources.
+* When you use a config file, `eksctl` generates CloudFormation stacks based on your definitions.
+* You can view these templates in the AWS Console, **export and enhance them**, and move toward managing your cluster **purely with CloudFormation** if you prefer more control.
+
+> ✅ This provides a clean migration path:
+> Start with `eksctl` ➝ Export CFN templates ➝ Customize and manage via CFN.
+
+---
+
+#### 3. **Terraform: A Preferred Alternative for Reconciliation**
+
+* **Terraform** is a popular infrastructure-as-code (IaC) tool that **tracks state**, compares it with the desired configuration, and **applies only the diffs**.
+* It’s **cloud-agnostic**, letting you manage not just EKS but also networking, DNS, IAM, and more across cloud providers.
+
+##### Terraform vs. CloudFormation:
+
+| Feature               | Terraform                       | CloudFormation                      |
+| --------------------- | ------------------------------- | ----------------------------------- |
+| Language              | HCL (HashiCorp)                 | JSON/YAML                           |
+| State management      | Maintains local or remote state | No external state, uses stack model |
+| Multi-cloud support   | Yes                             | No (AWS only)                       |
+| Modularity & reuse    | Strong (modules)                | Limited                             |
+| Community & ecosystem | Broad                           | AWS-specific                        |
+
+> ✅ If your use case demands **stateful updates, drift detection, and vendor-agnostic tooling**, Terraform is the go-to.
+
+---
+
+### Key Pointers
+
+Even if `eksctl` doesn’t support reapplying updated config files, the **value of the config file lies in clarity, consistency, and portability**. It helps:
+
+* Document your initial cluster setup
+* Serve as a stepping stone toward CloudFormation or Terraform
+* Onboard team members faster
+* Improve long-term maintainability
+
+So while `eksctl` is great for **bootstrapping**, production-grade infrastructure typically moves toward **Terraform** or **CloudFormation**—and your `eksctl` config files become part of that journey.
 
 ---
 
