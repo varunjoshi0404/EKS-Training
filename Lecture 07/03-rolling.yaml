@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  annotations:
+   kubernetes.io/change-cause: "Upgraded Nginx 1.20 to 1.21 to fix security issues"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+      name: mypod
+    spec:
+      containers:
+        - name: nginx-container
+          image: nginx:1.21
+          ports:
+            - containerPort: 80

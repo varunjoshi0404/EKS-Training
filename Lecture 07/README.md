@@ -397,77 +397,128 @@ We will create a **two-tier application** where:
 
 ---
 
-## **Deploying the Frontend and Backend**  
+## **Demo: Deploying Frontend and Backend on Kubernetes**
 
-### **Frontend Deployment (NGINX)**  
+This demo showcases a simple two-tier application setup using:
+
+* An NGINX-based **Frontend**
+* A lightweight **HTTP Echo Backend**
+* A **ClusterIP Service** for internal communication
+
+---
+
+### **Step 1: Deploy the Frontend (NGINX)**
+
 ```yaml
-apiVersion: apps/v1  # API version for Deployment
-kind: Deployment  # Resource type
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: frontend-deploy  # Name of the Deployment
+  name: frontend-deploy
 spec:
-  replicas: 3  # Number of Pod replicas
-  selector:  # Defines which Pods this Deployment manages
-    matchLabels:
-      app: frontend  # Label selector for Pods
-  template:  # Template for creating new Pods
-    metadata:
-      labels:
-        app: frontend  # Labels to apply to created Pods
-    spec:
-      containers:
-        - name: frontend-container  # Name of the container
-          image: nginx  # Container image to run (nginx from Docker Hub)
-
-```
-
-### **Backend Deployment (http-echo)**  
-```yaml
-apiVersion: apps/v1  # API version for Deployment
-kind: Deployment  # Kubernetes Deployment resource
-metadata:
-  name: backend-deploy  # Name of the Deployment
-spec:
-  replicas: 3  # Number of backend Pod replicas
+  replicas: 3  # Run 3 frontend Pods
   selector:
     matchLabels:
-      app: backend  # Match Pods with this label
+      app: frontend
   template:
     metadata:
       labels:
-        app: backend  # Assign label to created Pods
+        app: frontend
     spec:
       containers:
-      - name: backend-container  # Name of the container
-        image: hashicorp/http-echo  # Lightweight HTTP echo server
-        args:
-          - "-text=Hello from Backend"  # Text message the container will return
-
+        - name: frontend-container
+          image: nginx  # Official NGINX image
 ```
 
-### **Backend Service (ClusterIP)**  
+---
+
+### **Step 2: Deploy the Backend (http-echo)**
+
 ```yaml
-apiVersion: v1  # API version for Service
-kind: Service  # Kubernetes Service resource
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: backend-svc  # Name of the Service
+  name: backend-deploy
 spec:
-  type: ClusterIP  # Default service type, accessible within the cluster
-  ports:
-    - protocol: TCP  # Protocol used
-      port: 9090  # Port exposed by the Service
-      targetPort: 5678  # Port on the Pod that receives traffic
+  replicas: 3  # Run 3 backend Pods
   selector:
-    app: backend  # Targets Pods with this label
-
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend-container
+          image: hashicorp/http-echo
+          args:
+            - "-text=Hello from Backend"  # Echo this message for every request
 ```
 
+---
 
-## **Key Takeaways:**  
-- A **ClusterIP service** is used for **internal** communication within a Kubernetes cluster.  
-- **CoreDNS** resolves service names to their **ClusterIP**.  
-- **kube-proxy** manages traffic routing and load balances requests across multiple backend pods.  
-- This example demonstrated how an NGINX frontend interacts with an HTTP backend using a ClusterIP service.  
+### **Step 3: Create Backend Service (ClusterIP)**
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-svc
+spec:
+  type: ClusterIP  # Internal-only service
+  ports:
+    - protocol: TCP
+      port: 9090  # Service port
+      targetPort: 5678  # Backend pod container port
+  selector:
+    app: backend
+```
+
+---
+
+### **Step 4: Verify the Setup**
+
+Run the following commands to confirm that the frontend and backend are working correctly:
+
+```bash
+# Get deployment and pod status
+kubectl get deploy,pods
+
+# Get service information
+kubectl get svc backend-svc
+
+# Launch a temporary pod with curl installed to test internal service communication
+kubectl run test-client \
+  --image=nginx:alpine \
+  --rm -it \
+  --restart=Never \
+  -- /bin/sh
+```
+
+Inside the `test-client` shell:
+
+```sh
+curl http://backend-svc:9090
+# Expected output: Hello from Backend
+```
+
+> The `--rm` flag ensures the pod is **automatically deleted** after the test, keeping the environment clean.
+
+Exit the shell with:
+
+```sh
+exit
+```
+
+---
+
+
+## **Key Takeaways**
+
+* A **ClusterIP Service** is used for **internal communication** between frontend and backend.
+* **kube-proxy** handles load balancing across backend pods.
+* **CoreDNS** allows services to be accessed using their DNS names (e.g., `http://backend-svc`).
+* This setup illustrates the foundation of **service discovery and networking** inside Kubernetes.
 
 ---
 
@@ -522,11 +573,14 @@ User → Building-2 Front Desk (NodePort) → Extension 10 (ClusterIP) → HR (P
 
 ---
 
-### **Exposing a Frontend Application Using a NodePort Service**  
+### Demo: **Exposing a Frontend Application Using a NodePort Service**
 
-Let's deploy a **frontend application** and expose it using a **NodePort service**.  
+Let’s deploy a simple frontend application and expose it externally using a NodePort service.
+
+---
 
 ### **Step 1: Frontend Deployment (`frontend.yaml`)**
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -546,10 +600,13 @@ spec:
       - name: frontend-container
         image: nginx:latest
         ports:
-        - containerPort: 80  # NGINX serves content on port 80
+        - containerPort: 80
 ```
 
-### **Step 2: Frontend NodePort Service (`frontend-service.yaml`)**
+---
+
+### **Step 2: NodePort Service (`frontend-service.yaml`)**
+
 ```yaml
 apiVersion: v1
 kind: Service
@@ -561,12 +618,60 @@ spec:
     app: frontend
   ports:
     - protocol: TCP
-      port: 80         # ClusterIP service port
-      targetPort: 80   # Container's port inside the pod
-      nodePort: 31000  # Exposed externally (must be in 30000-32767)
+      port: 80
+      targetPort: 80
+      nodePort: 31000
 ```
 
-This service exposes the frontend using the NodePort **`31000`** on all worker nodes.
+This service exposes the application on port `31000` on all worker node IPs.
+
+---
+
+### **Step 3: Apply and Verify Resources**
+
+```bash
+# Apply the manifests
+kubectl apply -f frontend.yaml
+kubectl apply -f frontend-service.yaml
+
+# Verify pod and service status
+kubectl get pods -l app=frontend
+kubectl get svc frontend-svc
+```
+
+---
+
+### **Step 4: Test NodePort Access from Within the Cluster**
+
+Run a temporary pod using the `busybox` image to test internal connectivity:
+
+```bash
+kubectl run test-client \
+  --image=busybox:1.28 \
+  --rm -it \
+  --restart=Never \
+  -- wget -qO- http://frontend-svc:80
+```
+
+Expected output: HTML content from the NGINX default page.
+
+---
+
+### **Step 5: Test External Access**
+
+Find the public IP address of any worker node:
+
+```bash
+kubectl get nodes -o wide
+```
+
+Then access the application using curl from your local machine:
+
+```bash
+curl http://<NodeIP>:31000
+```
+
+This confirms external access to the NGINX service via NodePort.
 
 ---
 
@@ -635,23 +740,7 @@ User → Call Center (LoadBalancer) → Any Front Desk (NodePort)
 - This **public IP** is linked to the **LoadBalancer**, which then **routes traffic** to a **NodePort service** within the cluster.  
 - The **NodePort service** internally uses a **ClusterIP service** to **distribute traffic** to the **pods**.  
 
-## **LoadBalancer Service Manifest Example**  
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend-svc
-spec:
-  type: LoadBalancer
-  selector:
-    app: my-app
-  ports:
-    - protocol: TCP
-      port: 80         # ClusterIP Service port
-      targetPort: 80    # Container port inside the pod
-      nodePort: 31000   # Exposing service on this NodePort (must be within 30000-32767)
-```
+---
 
 ### **How This Works Behind the Scenes:**  
 
@@ -668,6 +757,107 @@ spec:
 4. **Pods:** Handle the **request on port 80**, serving the **application**.  
 
 **Important Note:** You typically won't see **LoadBalancer services** used directly in production, as the load balancing requirements of modern applications are often more complex. Instead, you'll usually find **Ingress Controllers** being used, as they offer advanced traffic management features like URL-based routing, SSL termination, and host-based routing. We'll explore Ingress Controllers in detail later in this course. 
+
+---
+
+## Demo: **Exposing Frontend Using a LoadBalancer Service on Amazon EKS**
+
+Now that you’ve tested NodePort access, we will delete the NodePort service and expose the application using a LoadBalancer service. On Amazon EKS, this creates a **Classic Load Balancer (CLB)** by default.
+
+---
+
+### **Step 1: Delete Existing NodePort Service**
+
+```bash
+kubectl delete svc frontend-svc
+```
+
+This removes the previous NodePort service. The deployment and pods remain intact.
+
+---
+
+### **Step 2: Create LoadBalancer Service**
+
+Apply the following YAML manifest:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+spec:
+  type: LoadBalancer  # Triggers creation of an external AWS Classic Load Balancer
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
+
+Apply it:
+
+```bash
+kubectl apply -f frontend-service.yaml
+```
+
+---
+
+### **Step 3: Verify LoadBalancer Provisioning**
+
+```bash
+kubectl get svc frontend-svc
+```
+
+You will see an **EXTERNAL-IP** being provisioned. Initially, it will be in a `pending` state while AWS provisions the Classic Load Balancer. This can take 1–2 minutes.
+
+Example output:
+
+```
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)        AGE
+frontend-svc    LoadBalancer   10.100.200.123   a1b2c3d4.elb.amazonaws.com   80:31234/TCP   20s
+```
+
+---
+
+### **Step 4: Access the Application**
+
+Once the `EXTERNAL-IP` field shows a DNS name:
+
+```bash
+curl http://<EXTERNAL-IP>
+```
+
+You should receive the default NGINX welcome page.
+
+---
+
+### **Step 5: Explore the Load Balancer in AWS Console**
+
+Go to **EC2 > Load Balancers** in the AWS Management Console. You’ll notice:
+
+* A **Classic Load Balancer (CLB)** with a name like `a1b2c3d4.elb.us-east-2.amazonaws.com`.
+* The backend instances (your EKS worker nodes) registered behind it.
+* Health checks configured for port 80.
+
+---
+
+### **Key Notes**
+
+* A **LoadBalancer service** in Kubernetes on AWS spins up a **Classic Load Balancer** by default.
+* This type of load balancer sends traffic directly to the worker nodes where the pods are scheduled.
+* The service selects pods based on the `selector` and balances traffic across them.
+* No need to open ports manually in the EC2 security group — Kubernetes configures them via the service controller.
+
+---
+
+### **Coming Up Later in This Course**
+
+Later in the course, we will:
+
+* Use **AWS Load Balancer Controller** to provision **Application Load Balancers (ALBs)**.
+* Support **Host-based and Path-based routing** using **Ingress**.
+* Terminate **TLS/SSL at the ALB level**.
 
 ---
 
