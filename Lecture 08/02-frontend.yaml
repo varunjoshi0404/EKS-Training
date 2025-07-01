@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: frontend-deploy
+  name: frontend-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+      env: dev
+      cc: cs2
+  template:
+    metadata:
+      labels:
+        app: frontend
+        env: dev
+        cc: cs2
+        department: cis
+        tl: jai
+        operations: critical
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: frontend-deploy
+  name: frontend-svc
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: frontend
+  type: NodePort

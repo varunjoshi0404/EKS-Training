@@ -18,16 +18,31 @@ spec:
 
 ---
 
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: frontend-svc
+# spec:
+#   type: NodePort
+#   selector:
+#     app: frontend
+#   ports:
+#     - protocol: TCP
+#       port: 80        # ClusterIP service port
+#       targetPort: 80   # The container’s port
+#       nodePort: 31000  # NodePort (must be within 30000-32767)
+
+
 apiVersion: v1
 kind: Service
 metadata:
   name: frontend-svc
 spec:
-  type: NodePort
+  type: LoadBalancer  # Regular k8s Service manifest with type as LoadBalancer
   selector:
     app: frontend
   ports:
-    - protocol: TCP
-      port: 80        # ClusterIP service port
-      targetPort: 80   # The container’s port
-      nodePort: 31000  # NodePort (must be within 30000-32767)
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 31000

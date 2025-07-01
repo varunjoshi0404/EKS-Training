@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: backend-deploy
+  name: backend-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - args:
+          - "-text=Hello from Backend"
+        image: hashicorp/http-echo
+        name: http-echo
+        ports:
+        - containerPort: 5678
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: backend-deploy
+  name: backend-svc
+spec:
+  ports:
+  - port: 9090
+    protocol: TCP
+    targetPort: 5678
+  selector:
+    app: backend
+  type: ClusterIP
