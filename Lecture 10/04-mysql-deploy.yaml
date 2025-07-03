@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      initContainers:
+        - name: init-clean
+          image: busybox
+          command: ["sh", "-c", "rm -rf /var/lib/mysql/*"]
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: mypassword          
+            - name: MYSQL_USER
+              value: myuser
+            - name: MYSQL_PASSWORD
+              value: mypassword
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: mysql-init-script
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: mysql-init-script
+          configMap:
+            name: mysql-init-cm

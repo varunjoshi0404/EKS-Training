@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-flask
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-flask
+  template:
+    metadata:
+      labels:
+        app: frontend-flask
+    spec:
+      containers:
+        - name: frontend-flask
+          image: varunjoshi0404/flask-usermgmt-api:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: mysql-svc
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: usermgmt
+            - name: DB_USER
+              value: root
+            - name: DB_PASSWORD
+              value: mypassword
