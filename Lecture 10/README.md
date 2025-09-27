@@ -89,7 +89,7 @@ This module will walk through deploying a **two-tier application** with persiste
 
 This diagram illustrates a collapsed-tier application deployment on an Amazon EKS cluster. The user interacts with the application via a **NodePort service** (`frontend-flask-svc`), which routes external traffic to the `frontend-flask` pod running Flask. This pod serves both the **web interface** and **REST API**.
 
-Internally, the Flask application connects to a MySQL database using the Kubernetes DNS name `mysql-svc`. This service (`ClusterIP`) enables internal-only access to the `mysql` pod, which is backed by an **Amazon EBS volume** (not shown here) for persistent data storage.
+Internally, the Flask application connects to a MySQL database using the Kubernetes DNS name `mysql-svc`. This service (`ClusterIP`) enables internal-only access to the `mysql` pod, which is backed by an **Amazon EBS volume** for persistent data storage.
 
 **Key Components:**
 
@@ -351,15 +351,6 @@ Kubernetes Deployments support two rollout strategies:
 | --------------------------- | ----------------------------------------------------------------------------- | --------------------------------- |
 | **RollingUpdate** (default) | Creates new Pods before terminating the old ones. This ensures zero downtime. | Stateless apps like web frontends |
 | **Recreate**                | Terminates all existing Pods before creating new ones.                        | **Stateful apps like databases**  |
-
----
-
-Here's an improved and corrected version of your section that:
-
-* Clarifies how read replicas actually work (they read from the same underlying DB, not the same volume).
-* Introduces managed DB services (e.g., RDS, DynamoDB).
-* Explains when and why StatefulSets and Headless Services are used for databases in Kubernetes.
-* Adds benefits of using StatefulSet with Headless Service.
 
 ---
 
@@ -654,8 +645,6 @@ Later in the course, we’ll evolve this app further using:
 * **AWS ALB Ingress Controller** for scalable external access
 * **Horizontal & Vertical Pod Autoscalers** for dynamic scaling
 * **Cluster Autoscaler** for optimizing infrastructure cost and efficiency
-
-Stay tuned—this journey from basic to production-ready Kubernetes is just getting started.
 
 ---
 

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: app1-quota
+  namespace: app1-ns
+spec:
+  hard:
+    pods: "10"                        # Max total number of pods in the namespace
+    requests.cpu: "4"                # Total requested CPU across all pods (e.g., 4 cores)
+    requests.memory: "8Gi"           # Total requested memory across all pods
+    limits.cpu: "6"                  # Total max CPU allowed (limits)
+    limits.memory: "12Gi"            # Total max memory allowed
+    persistentvolumeclaims: "5"      # Max number of PVCs allowed
+    requests.storage: "50Gi"         # Max total PVC storage requested

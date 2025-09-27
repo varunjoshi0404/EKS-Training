@@ -20,20 +20,20 @@ iam:
 
 managedNodeGroups:
   - name: ng-public-1
-    instanceType: t3a.medium
+    instanceType: t3a.small
     minSize: 2
-    maxSize: 4
+    maxSize: 3
     privateNetworking: false
     volumeSize: 20
-    ssh:
-      allow: true
-      publicKeyName: eks-vj-ohio
+    # ssh:
+    #   allow: true
+    #   publicKeyName: eks-vj-ohio
     iam:
       withAddonPolicies:
         autoScaler: true
         externalDNS: true
         certManager: false
-        ebs: false
+        ebs: true
         fsx: false
         efs: false
         albIngress: true

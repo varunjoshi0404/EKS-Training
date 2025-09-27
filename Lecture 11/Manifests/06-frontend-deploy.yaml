@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-flask
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-flask
+  template:
+    metadata:
+      labels:
+        app: frontend-flask
+    spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              echo "[INFO] Waiting for MySQL to become available at mysql-svc:3306..."
+              until nc -z -v -w30 mysql-svc 3306; do
+                echo "[WAITING] Still waiting for DB... retrying in 5s"
+                sleep 5
+              done
+              echo "[SUCCESS] DB is now reachable. Proceeding with app startup."
+      containers:
+        - name: frontend-flask
+          image: varunjoshi0404/flask-usermgmt-api:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: mysql-svc
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: usermgmt
+            - name: DB_USER
+              value: root
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 5

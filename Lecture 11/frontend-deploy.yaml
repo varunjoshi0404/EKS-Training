@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deploy
+  namespace: app1-ns
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend-container
+          image: nginx
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+  namespace: app1-ns
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80         # ClusterIP service port
+      targetPort: 80   # The container’s port
+      nodePort: 31000  # NodePort (must be within 30000-32767)

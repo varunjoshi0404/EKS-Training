@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cpu-demo
+spec:
+  containers:
+  - name: cpu-container
+    image: vish/stress
+    resources:
+      requests:
+        cpu: "400m"
+      limits:
+        cpu: "900m"
+    args:
+    - -cpus
+    - "1"

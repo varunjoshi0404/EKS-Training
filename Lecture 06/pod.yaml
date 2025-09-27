@@ -15,3 +15,6 @@ spec:
     - name: sidecar-container
       image: busybox
       args: ["sleep", "3600"]
+  volumes:
+
+      -

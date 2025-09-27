@@ -16,10 +16,10 @@ allowVolumeExpansion: true
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: ebs-sc-io2
+  name: ebs-sc-io1
 provisioner: ebs.csi.aws.com
 parameters:
-  type: io2
+  type: io1
 volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Delete
 allowVolumeExpansion: true
