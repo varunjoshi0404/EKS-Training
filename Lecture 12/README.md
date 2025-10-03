@@ -2,11 +2,6 @@
 
 ---
 
-### **Introduction**
-Welcome to Day 21! Today, we explore **multi-container pods**, an essential Kubernetes concept that enables closely integrated containers to collaborate efficiently. While pods can contain just one container, Kubernetes allows **multi-container pods**, which often include a primary container complemented by one or more helper containers. These help extend functionality or enhance the environment for the main application.
-
----
-
 
 ## Introduction  
 
@@ -170,27 +165,33 @@ error: Metrics API not available.
 
 ---
 
-## **How Kubernetes Collects Metrics**  
+## **How Kubernetes Collects “kubectl top” Metrics**
 
 ![Alt text](/images/11e.png)
 
-To understand how **kubectl top nodes** retrieves resource metrics, let's break down the process:  
+1. **cAdvisor (in kubelet) samples usage**
 
-1. **cAdvisor Collects Metrics**  
-   - The **cAdvisor** (Container Advisor) component, running inside the kubelet, collects CPU, memory, filesystem, and network usage metrics from nodes and pods.  
-   - cAdvisor exposes these metrics via a **REST API**.  
+   * cAdvisor is built into the **kubelet** and measures **CPU, memory, FS, network** for **pods/containers/nodes**.
+   * Kubelet exposes these as a **summary API** at `/stats/summary`.
 
-2. **Kubelet Gathers and Exposes Metrics**  
-   - The **kubelet** on each node queries cAdvisor and exposes the collected metrics via its own API.  
+2. **Metrics Server scrapes kubelets**
 
-3. **Metrics Server Aggregates Data from Kubelet**  
-   - The **Metrics Server** fetches data from the kubelet's API, which in turn gathers data from cAdvisor.  
-   - This enables cluster-wide **resource usage monitoring** of nodes, pods, and containers.  
+   * **metrics-server** periodically **scrapes each kubelet’s `/stats/summary`** over TLS.
+   * It keeps only **recent, in-memory** samples (no history/TSDB), and serves the **`metrics.k8s.io`** API.
 
-4. **API Server Serves the Metrics**  
-   - When we run `kubectl top nodes`, the **kubectl client requests the API Server** to fetch the latest resource usage from the **Metrics Server**.  
+3. **API server aggregation layer publishes the API**
 
+   * The **API server’s aggregation layer** mounts metrics-server under the **`/apis/metrics.k8s.io/`** group.
 
+4. **kubectl top queries `metrics.k8s.io`**
+
+   * `kubectl top nodes|pods` → hits the API server → **proxied to metrics-server** → returns the latest CPU/Memory usage.
+
+**Notes**
+
+* This pipeline is **for live resource usage only** (not historical). Use **Prometheus** for long-term metrics.
+* metrics-server **doesn’t scrape Prometheus endpoints**; it reads **kubelet summaries**.
+* If metrics-server is missing or blocked (RBAC/network), `kubectl top` returns **no metrics**.
 
 ---
 
