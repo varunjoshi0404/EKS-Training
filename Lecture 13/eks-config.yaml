@@ -1,0 +1,43 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: cwvj-eks-cluster
+  region: us-east-2
+  tags:
+    owner: varun-joshi
+    bu: cwvj
+    environment: prod
+    project: statefulsets-training
+
+availabilityZones:
+  - us-east-2a
+  - us-east-2b
+  - us-east-2c
+
+iam:
+  withOIDC: true
+
+managedNodeGroups:
+  - name: cwvj-eks-priv-ng
+    instanceType: t3.small
+    minSize: 4
+    maxSize: 5
+    privateNetworking: true
+    volumeSize: 20
+    # ssh:
+    #   allow: true
+      #publicKeyName: eks-vj-ohio
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        externalDNS: false
+        certManager: false
+        ebs: true
+        fsx: false
+        efs: false
+        albIngress: true
+        xRay: false
+        cloudWatch: false
+    labels:
+      lifecycle: ec2-autoscaler
