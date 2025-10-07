@@ -539,7 +539,7 @@ spec:
               <head><title>iPhone Users</title></head>
               <body>
                 <h1>iPhone Users</h1>
-                <p>Welcome to Cloud With VarJosh</p>
+                <p>Welcome to EKS Training by Varun Joshi</p>
               </body>
             </html>' > /iphone/index.html && cd / && python3 -m http.server 5678
         ports:
@@ -613,7 +613,7 @@ spec:
               <head><title>Android Users</title></head>
               <body>
                 <h1>Android Users</h1>
-                <p>Welcome to Cloud With VarJosh</p>
+                <p>Welcome to EKS Training by Varun Joshi</p>
               </body>
             </html>' > /android/index.html && cd / && python3 -m http.server 5678
         ports:
@@ -686,7 +686,7 @@ spec:
               <head><title>Desktop Users</title></head>
               <body>
                 <h1>Desktop Users</h1>
-                <p>Welcome to Cloud With VarJosh</p>
+                <p>Welcome to EKS Training by Varun Joshi</p>
               </body>
             </html>' > /index.html && python3 -m http.server 5678
         ports:
@@ -972,7 +972,7 @@ Expected Output:
 
 ```
 iPhone Users
-Welcome to Cloud With VarJosh
+Welcome to EKS Training by Varun Joshi
 ```
 
 This is served by the `iphone-deploy` pods, with static HTML under `/iphone/index.html`.
@@ -989,7 +989,7 @@ Expected Output:
 
 ```
 Android Users
-Welcome to Cloud With VarJosh
+Welcome to EKS Training by Varun Joshi
 ```
 
 This is served by the `android-deploy` pods from `/android/index.html`.
@@ -1006,7 +1006,7 @@ Expected Output:
 
 ```
 Desktop Users
-Welcome to Cloud With VarJosh
+Welcome to EKS Training by Varun Joshi
 ```
 
 This route is matched last and acts as the catch-all fallback. If the request path doesn't match `/iphone` or `/android`, it routes to `desktop-svc`, which serves from the root (`/index.html`).
@@ -1251,15 +1251,15 @@ Try accessing the following URLs:
 ```bash
 https://cwvj.click/
 → Desktop Users
-→ Welcome to Cloud With VarJosh
+→ Welcome to EKS Training by Varun Joshi
 
 https://cwvj.click/iphone/
 → iPhone Users
-→ Welcome to Cloud With VarJosh
+→ Welcome to EKS Training by Varun Joshi
 
 https://cwvj.click/android/
 → Android Users
-→ Welcome to Cloud With VarJosh
+→ Welcome to EKS Training by Varun Joshi
 ```
 
 The following behaviors should be observed:
@@ -1386,7 +1386,7 @@ spec:
               <head><title>iPhone Users</title></head>
               <body>
                 <h1>iPhone Users</h1>
-                <p>Welcome to Cloud With VarJosh</p>
+                <p>Welcome to EKS Training by Varun Joshi</p>
               </body>
             </html>' > /index.html && python3 -m http.server 5678
         ports:
