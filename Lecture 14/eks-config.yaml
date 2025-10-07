@@ -1,0 +1,38 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: cwvj-ingress-demo
+  region: us-east-2
+  tags:
+    owner: varun-joshi
+    bu: cwvj
+    project: ingress-demo
+
+availabilityZones:
+  - us-east-2a
+  - us-east-2b
+
+iam:
+  withOIDC: true
+
+managedNodeGroups:
+  - name: cwvj-eks-priv-ng
+    instanceType: t3.small
+    minSize: 4
+    maxSize: 4
+    privateNetworking: true
+    volumeSize: 20
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        externalDNS: false
+        certManager: yes
+        ebs: false
+        fsx: false
+        efs: false
+        albIngress: true
+        xRay: false
+        cloudWatch: false
+    labels:
+      lifecycle: ec2-autoscaler

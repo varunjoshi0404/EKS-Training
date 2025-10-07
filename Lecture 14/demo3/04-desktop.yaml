@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: desktop-deploy
+  namespace: app1-ns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: desktop-page
+  template:
+    metadata:
+      labels:
+        app: desktop-page
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: desktop-page
+      containers:
+      - name: python-http
+        image: python:alpine
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo '<html>
+              <head><title>Desktop Users</title></head>
+              <body>
+                <h1>Desktop Users</h1>
+                <p>Welcome to Cloud With VarJosh</p>
+              </body>
+            </html>' > /index.html && python3 -m http.server 5678
+        ports:
+        - containerPort: 5678
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: desktop-svc
+  namespace: app1-ns
+  annotations:    
+    alb.ingress.kubernetes.io/healthcheck-path: /index.html
+spec:
+  selector:
+    app: desktop-page
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5678

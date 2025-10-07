@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-demo1
+  namespace: app1-ns
+  annotations:
+    # AWS ALB Ingress Controller Settings
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/load-balancer-name: cwvj-ingress-demo1
+
+    # Target Type and Listener Port
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+
+    # Health Check Settings (delegated per-service)
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/success-codes: '200'
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /iphone
+            pathType: Prefix # https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types
+            backend:
+              service:
+                name: iphone-svc
+                port:
+                  number: 80
+          - path: /android
+            pathType: Prefix
+            backend:
+              service:
+                name: android-svc
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: desktop-svc
+                port:
+                  number: 80
